@@ -7,11 +7,23 @@ TRANSFORMERS = {
 class Alert:
     """An alert. Duh."""
 
-    def __init__(self, service_name, message, timestamp):
-        self.service = service_name
+    def __init__(self, service, message, timestamp):
+        self.count = 0
+        self.service = service
         self.message = message
         self.timestamp = timestamp
-        self.state = None
+        self.severity = None
+        self.target = None
+
+    def __getitem__(self, item):
+        return getattr(self, item)
+
+    def __setitem__(self, item, value):
+        return setattr(self, item, value)
+
+    def __hash__(self):
+        # Ignore timestamp since this is used to snooze
+        return hash((self.severity, self.service, self.message))
 
     @classmethod
     def from_service(cls, service_name, data):
@@ -22,3 +34,4 @@ def transform_sensu(data):
     """Decompose a sensu alert into arguments for an alert"""
     # TODO: maybe calulate a hashed alert ID here?
     return data.message, data.timestamp
+

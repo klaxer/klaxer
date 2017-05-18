@@ -1,7 +1,74 @@
 """Core methods"""
 
-from klaxer.errors import AuthorizationError
+from enum import Enum
+
+from klaxer.errors import AuthorizationError, NoRouteFoundError
+
+class Slack:
+
+    def get_last_message(self, target):
+        pass
+
+    def delete_message(self, message):
+        pass
+
+    def send_alert(self, alert):
+        pass
+
+class NoValueEnum(Enum):
+    def __repr__(self):
+        return '<%s.%s>' % (self.__class__.__name__, self.name)
+
+class Severity(NoValueEnum):
+    WARNING = 'warning'
+    CRITICAL = 'critical'
+    UNKNOWN = 'unknown'
 
 def validate(service_name, token):
     #TODO: Implement. Raise AuthorizationError if invalid, otherwise just pass through
     pass
+
+
+def classify(alert, rules):
+    """Determine the severity of an alert
+
+    :param alert: The alert to test
+    :param rules: An array of classification rules to test against
+    """
+    for rule in rules:
+        severity = rule(alert)
+        if severity:
+            alert.severity = severity
+            break
+    else:
+        alert.severity = Severity.UNKNOWN
+    return alert
+
+def filtered(alert, rules):
+    """Determine if an alert meets a rule in a ruleset"""
+    return any(rule(alert) for rule in rules)
+
+def enrich(alert, enrichments):
+    """Enrich an alert"""
+    for enrichment in enrichments:
+        updates = enrichment(alert)
+        if not updates:
+            continue
+        for name, value in enrichment(alert).items():
+            alert[name] = value
+    return alert
+
+def route(alert, routes):
+    for target, test in routes:
+        if test(alert):
+            alert.target = target
+            return alert
+    raise NoRouteFoundError()
+
+def send(alert):
+    slack = Slack()
+    last = slack.get_last_message(alert.target)
+    if alert == last:
+        slack.delete_message(last)
+    alert.count += 1 # TODO: actually extract the count from `last`
+    slack.send_alert(alert)
