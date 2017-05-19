@@ -17,3 +17,6 @@ ENRICHMENTS = [
 ROUTES = [
     ('#dmesg', lambda x: x.service == 'root'),
 ]
+
+# Every 5 minutes
+WINDOW = 60 * 5

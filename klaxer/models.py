@@ -30,6 +30,7 @@ class Alert:
         """Get an instance of the class with normalized service data"""
         return cls(service_name, *TRANSFORMERS[service_name](data))
 
+
 def transform_sensu(data):
     """Decompose a sensu alert into arguments for an alert"""
     # TODO: maybe calulate a hashed alert ID here?
