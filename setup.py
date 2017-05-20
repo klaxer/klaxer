@@ -8,6 +8,7 @@ from setuptools import setup, find_packages
 
 REQUIREMENTS = [
     'flask',
+    'requests',
     'zappa',
 ]
 
