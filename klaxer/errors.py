@@ -5,3 +5,6 @@ class AuthorizationError(BaseException):
 
 class NoRouteFoundError(BaseException):
     pass
+
+class ChannelNotFoundError(BaseException):
+    pass

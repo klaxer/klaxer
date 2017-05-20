@@ -1,5 +1,7 @@
 """Configuration, natch."""
 
+import os
+
 from klaxer.lib import Severity
 
 CLASSIFICATION_RULES = [
@@ -17,6 +19,8 @@ ENRICHMENTS = [
 ROUTES = [
     ('#dmesg', lambda x: x.service == 'root'),
 ]
+
+SLACK_TOKEN = os.environ.get('KLAXER_TOKEN')
 
 # Every 5 minutes
 WINDOW = 60 * 5
