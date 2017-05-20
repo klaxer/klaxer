@@ -1,7 +1,11 @@
 FROM python:3.6
 MAINTAINER Kevin Dwyer
 
-RUN pip install flask==0.12.2 zappa==0.42.0
+# Add Klaxer requirements to container
+ADD requirements.txt /etc/klaxer/
+
+# Install dependencies
+RUN pip install -r /etc/klaxer/requirements.txt
 
 ENV PYTHONPATH=/klaxer
 
