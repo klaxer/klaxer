@@ -3,5 +3,7 @@ MAINTAINER Kevin Dwyer
 
 RUN pip install flask==0.12.2 zappa==0.42.0
 
+ENV PYTHONPATH=/klaxer
+
 ENTRYPOINT ["bash"]
 #CMD ["-c", "python"]
