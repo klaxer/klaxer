@@ -1,8 +1,5 @@
 """Models for DTO and other ops."""
-
-TRANSFORMERS = {
-    'sensu': transform_sensu
-}
+from enum import Enum
 
 class Alert:
     """An alert. Duh."""
@@ -36,3 +33,16 @@ def transform_sensu(data):
     # TODO: maybe calulate a hashed alert ID here?
     return data.message, data.timestamp
 
+TRANSFORMERS = {
+    'sensu': transform_sensu
+}
+
+
+class NoValueEnum(Enum):
+    def __repr__(self):
+        return '<%s.%s>' % (self.__class__.__name__, self.name)
+
+class Severity(NoValueEnum):
+    WARNING = 'warning'
+    CRITICAL = 'critical'
+    UNKNOWN = 'unknown'

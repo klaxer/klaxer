@@ -2,7 +2,7 @@
 
 import os
 
-from klaxer.lib import Severity
+from klaxer.models import Severity
 
 CLASSIFICATION_RULES = [
     lambda x: Severity.CRITICAL if 'error' in x.message else Severity.WARNING if 'warning' in x.message else None

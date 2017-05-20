@@ -1,20 +1,11 @@
 """Core methods"""
 
-from enum import Enum
 from datetime import datetime
 
 from klaxer import config
 from klaxer.errors import AuthorizationError, NoRouteFoundError
+from klaxer.models import Severity
 
-
-class NoValueEnum(Enum):
-    def __repr__(self):
-        return '<%s.%s>' % (self.__class__.__name__, self.name)
-
-class Severity(NoValueEnum):
-    WARNING = 'warning'
-    CRITICAL = 'critical'
-    UNKNOWN = 'unknown'
 
 def validate(service_name, token):
     #TODO: Implement. Raise AuthorizationError if invalid, otherwise just pass through
