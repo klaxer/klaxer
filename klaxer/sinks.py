@@ -1,5 +1,10 @@
+"""Data outflow"""
+
+import json
+import logging
 import urllib.request
 from collections import namedtuple
+from datetime import datetime
 
 from slacker import Slacker
 
