@@ -31,6 +31,7 @@ def incoming(service_name, token):
         alert = route(alert, ROUTES)
         #The target channel gets queried for the most recent message. If it's identical, perform rollup. Otherwise, post the alert.
         send(alert)
-        return "ok", 200
-    except (AuthorizationError, NoRouteFoundError):
-        return None, 501
+        return "ok"
+    except (AuthorizationError, NoRouteFoundError) as error:
+        app.logger.exception('Failed to serve an alert response')
+        return str(error), 500
