@@ -11,4 +11,4 @@ ENV FLASK_DEBUG=1
 EXPOSE 8000
 
 ENTRYPOINT ["bash"]
-#CMD ["-c", "flask run -p 8000"]
+CMD ["-c", "flask run -p 8000"]

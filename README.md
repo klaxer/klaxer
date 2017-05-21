@@ -16,7 +16,12 @@ Build the docker image:
 
 Run the container:
 `docker run -v $(pwd):/klaxer --name klaxer_instance -i -t klaxer`
+This will start the flask server.
 
+To get a shell in the container:
+`docker exec -it klaxer_instance bash`
+
+## Development
 Run the klaxer server:
 `flask run -p 8000 &`
 
