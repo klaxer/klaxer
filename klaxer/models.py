@@ -1,5 +1,16 @@
 """Models for DTO and other ops."""
+import datetime
 from enum import Enum
+
+TRANSFORMERS = {}
+
+def transformer(name):
+    """Decorator for transforms."""
+    def decorator(func):
+        """Register the transformer"""
+        TRANSFORMERS[name] = func
+        return func
+    return decorator
 
 class Alert:
     """An alert. Duh."""
@@ -28,15 +39,11 @@ class Alert:
         return cls(service_name, *TRANSFORMERS[service_name](data))
 
 
+@transformer('sensu')
 def transform_sensu(data):
     """Decompose a sensu alert into arguments for an alert"""
     # TODO: maybe calulate a hashed alert ID here?
-    return data.message, data.timestamp
-
-TRANSFORMERS = {
-    'sensu': transform_sensu
-}
-
+    return data['attachments'][0]['text'], datetime.datetime.now()
 
 class NoValueEnum(Enum):
     def __repr__(self):

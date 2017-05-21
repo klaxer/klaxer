@@ -29,7 +29,7 @@ def send_alert(host, severity):
         'text': f'{SERVICE_NAME}/disk-usage: CheckDisk {severity.upper()}: / 85.12% bytes usage (6 GiB/7 GiB)\n : {SYSTEM} : sensu-clients,testing,client:{SERVICE_NAME}',
         'color': f'{"red" if severity == "error" else "yellow"}',
     }
-    requests.post(f'http://{host}/alert/sensu/12345', json=json.dumps(MESSAGE_TEMPLATE))
+    requests.post(f'http://{host}/alert/sensu/12345', json=MESSAGE_TEMPLATE)
 
 def main():
     args = parse_args()

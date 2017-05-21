@@ -2,9 +2,9 @@
 
 from datetime import datetime
 
-from klaxer import config
 from klaxer.errors import AuthorizationError, NoRouteFoundError
 from klaxer.models import Severity
+from klaxer.sinks import Slack
 
 
 def validate(service_name, token):
@@ -51,7 +51,7 @@ def route(alert, routes):
 def send(alert):
     slack = Slack()
     last = slack.get_last_message(alert.target)
-    if alert == last:
+    if alert == last.message:
         slack.delete_message(last)
     alert.count += 1 # TODO: actually extract the count from `last`
     slack.send_alert(alert)

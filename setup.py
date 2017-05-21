@@ -10,6 +10,7 @@ REQUIREMENTS = [
     'flask',
     'requests',
     'zappa',
+    'slacker'
 ]
 
 if sys.version_info <= (3, 6):

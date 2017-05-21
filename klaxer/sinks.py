@@ -5,7 +5,6 @@ from slacker import Slacker
 
 from klaxer import config, errors
 
-
 Channel = namedtuple('Channel', ['id', 'name'])
 User = namedtuple('User', ['id', 'name', 'handle'])
 Message = namedtuple('Message', ['ts', 'user', 'username', 'text', 'type', 'bot_id', 'bot_link', 'subtype'])
@@ -95,5 +94,21 @@ class Slack(Destination):
         return response.successful
 
     def post_message(self, message):
+        last_message = self.get_last_message()
+        debounced = False
+        if message in last_message.text:
+            debounced = True
+            message = debounce(last_message.text)
         response = self.slack.chat.post_message(channel=self.channel.id, text=message).body.get('message')
+        if debounced:
+            self.delete_message(last_message)
         return Message(**response)
+
+
+def debounce(text):
+    if '(x' in text:
+        old_amount = text.split('(x')[1].split(')')[0]
+        new_amount = str(int(old_amount) + 1)
+    else:
+        return f'{text} (x2)'
+    return text.replace(old_amount, new_amount)
