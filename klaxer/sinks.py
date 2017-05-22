@@ -14,7 +14,7 @@ from klaxer.models import Severity
 
 Channel = namedtuple('Channel', ['id', 'name'])
 User = namedtuple('User', ['id', 'name', 'handle'])
-Message = namedtuple('Message', ['attachments', 'ts', 'user', 'username', 'text', 'type', 'bot_id', 'bot_link', 'subtype'])
+Message = namedtuple('Message', ['attachments', 'icons', 'ts', 'user', 'username', 'text', 'type', 'bot_id', 'bot_link', 'subtype'])
 Message.__new__.__defaults__ = (None,) * len(Message._fields)
 
 # Regex pattern for text ending with dup indicators (e.g. "(x2)")
@@ -123,11 +123,16 @@ class Slack(Destination):
         if attachment and alert.message in unslack_text(attachment['text']): #TODO: Test more than just the message
             debounced = True
             alert.message = debounce(attachment['text'])
-        response = self.slack.chat.post_message(channel=self.channel.id, attachments=[{
-            'title': alert.title,
-            'text': alert.message,
-            'color': severity_to_color(alert.severity)
-        }]).body.get('message')
+        response = self.slack.chat.post_message(
+            channel=self.channel.id,
+            username=alert.username,
+            icon_emoji=alert.icon_emoji,
+            icon_url=alert.icon_url,
+            attachments=[{
+                'title': alert.title,
+                'text': alert.message,
+                'color': severity_to_color(alert.severity)
+            }]).body.get('message')
         if debounced:
             self.delete_message(last_message)
         return Message(**response)
