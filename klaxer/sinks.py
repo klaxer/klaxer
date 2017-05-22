@@ -17,7 +17,7 @@ Message = namedtuple('Message', ['ts', 'user', 'username', 'text', 'type', 'bot_
 Message.__new__.__defaults__ = (None,) * len(Message._fields)
 
 # Regex pattern for text ending with dup indicators (e.g. "(x2)")
-debounce_pattern = '\(x(?P<count>\d+)\)$'
+debounce_pattern = r'\(x(?P<count>\d+)\)$'
 debounce_regex = re.compile(debounce_pattern)
 
 
@@ -116,14 +116,12 @@ class Slack(Destination):
 
 
 def debounce(text):
-    # Check for signs of a dup indicator
+    """Check for signs of a dup indicator, and increment the counter if present"""
     is_dup = debounce_regex.search(text)
 
     if is_dup:
         old_amount = is_dup.group('count')
         new_amount = str(int(old_amount) + 1)
-    else:
-        return f'{text} (x2)'
-
-    return text.replace(old_amount, new_amount)
-
+        start, end = is_dup.span('count')
+        return f'{text[:start]}{new_amount}{text[end:]}'
+    return f'{text} (x2)'
