@@ -15,13 +15,14 @@ def transformer(name):
 class Alert:
     """An alert. Duh."""
 
-    def __init__(self, service, message, timestamp):
+    def __init__(self, service, title, message, timestamp):
         self.count = 0
         self.service = service
         self.message = message
         self.timestamp = timestamp
         self.severity = None
         self.target = None
+        self.title = title
 
     def __getitem__(self, item):
         return getattr(self, item)
@@ -31,7 +32,7 @@ class Alert:
 
     def __hash__(self):
         # Ignore timestamp since this is used to snooze
-        return hash((self.severity, self.service, self.message))
+        return hash((self.severity, self.service, self.title, self.message))
 
     @classmethod
     def from_service(cls, service_name, data):
@@ -43,7 +44,7 @@ class Alert:
 def transform_sensu(data):
     """Decompose a sensu alert into arguments for an alert"""
     # TODO: maybe calulate a hashed alert ID here?
-    return data['attachments'][0]['text'], datetime.datetime.now()
+    return data['attachments'][0]['title'], data['attachments'][0]['text'], datetime.datetime.now()
 
 class NoValueEnum(Enum):
     def __repr__(self):
