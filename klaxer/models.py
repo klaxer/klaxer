@@ -53,4 +53,5 @@ class NoValueEnum(Enum):
 class Severity(NoValueEnum):
     WARNING = 'warning'
     CRITICAL = 'critical'
+    OK = 'ok'
     UNKNOWN = 'unknown'
