@@ -1,5 +1,6 @@
 """Data outflow"""
 
+import re
 import json
 import logging
 import urllib.request
@@ -14,6 +15,10 @@ Channel = namedtuple('Channel', ['id', 'name'])
 User = namedtuple('User', ['id', 'name', 'handle'])
 Message = namedtuple('Message', ['ts', 'user', 'username', 'text', 'type', 'bot_id', 'bot_link', 'subtype'])
 Message.__new__.__defaults__ = (None,) * len(Message._fields)
+
+# Regex pattern for text ending with dup indicators (e.g. "(x2)")
+debounce_pattern = '\(x(?P<count>\d+)\)$'
+debounce_regex = re.compile(debounce_pattern)
 
 
 class Destination:
@@ -111,9 +116,14 @@ class Slack(Destination):
 
 
 def debounce(text):
-    if '(x' in text:
-        old_amount = text.split('(x')[1].split(')')[0]
+    # Check for signs of a dup indicator
+    is_dup = debounce_regex.search(text)
+
+    if is_dup:
+        old_amount = is_dup.group('count')
         new_amount = str(int(old_amount) + 1)
     else:
         return f'{text} (x2)'
+
     return text.replace(old_amount, new_amount)
+
