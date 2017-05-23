@@ -10,16 +10,19 @@ from datetime import datetime
 from slacker import Slacker
 
 from klaxer import config, errors
+from klaxer.models import Severity
 
 Channel = namedtuple('Channel', ['id', 'name'])
 User = namedtuple('User', ['id', 'name', 'handle'])
-Message = namedtuple('Message', ['ts', 'user', 'username', 'text', 'type', 'bot_id', 'bot_link', 'subtype'])
+Message = namedtuple('Message', ['attachments', 'icons', 'ts', 'user', 'username', 'text', 'type', 'bot_id', 'bot_link', 'subtype'])
 Message.__new__.__defaults__ = (None,) * len(Message._fields)
 
 # Regex pattern for text ending with dup indicators (e.g. "(x2)")
-debounce_pattern = '\(x(?P<count>\d+)\)$'
+debounce_pattern = r'\(x(?P<count>\d+)\)$'
 debounce_regex = re.compile(debounce_pattern)
 
+# Regex pattern for Slack's URL markup: <http://url|url>
+URL_PATTERN = re.compile(r'\<https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)\|(?P<url>.*?)\>')
 
 class Destination:
     """Base for defining Slack destinations to send `Message`s to."""
@@ -63,8 +66,7 @@ class Destination:
         return self._alive
 
     def send_alert(self):
-        logging.warning("Method send_alert not implemented!")
-        return
+        raise NotImplementedError('send_alert')
 
 
 class Slack(Destination):
@@ -114,16 +116,56 @@ class Slack(Destination):
             self.delete_message(last_message)
         return Message(**response)
 
+    def send_alert(self, alert):
+        last_message = self.get_last_message()
+        debounced = False
+        attachment = last_message.attachments[0] if last_message.attachments else None
+        if attachment and alert.message in unslack_text(attachment['text']): #TODO: Test more than just the message
+            debounced = True
+            alert.message = debounce(attachment['text'])
+        response = self.slack.chat.post_message(
+            channel=self.channel.id,
+            username=alert.username,
+            icon_emoji=alert.icon_emoji,
+            icon_url=alert.icon_url,
+            attachments=[{
+                'title': alert.title,
+                'text': alert.message,
+                'color': severity_to_color(alert.severity)
+            }]).body.get('message')
+        if debounced:
+            self.delete_message(last_message)
+        return Message(**response)
+
+def severity_to_color(severity):
+    """Map severity levels to colors"""
+    # These colors are from the Tomorrow Night Eighties colorscheme:
+    #  https://github.com/chriskempson/tomorrow-theme
+    if severity == Severity.CRITICAL:
+        return '#f2777a'
+    elif severity == Severity.WARNING:
+        return '#ffcc66'
+    elif severity == Severity.OK:
+        return '#99cc99'
+    elif severity == Severity.UNKNOWN:
+        return '#999999'
+    raise ValueError('Invalid severity supplied')
+
+def unslack_text(text):
+    """Slack applies formatting to inline URLs. This undoes it"""
+    has_url = URL_PATTERN.search(text)
+    if has_url:
+        # Searching only returns one match. Recursively unslack the message.
+        return unslack_text(text.replace(has_url.group(0), has_url.group('url')))
+    return text
 
 def debounce(text):
-    # Check for signs of a dup indicator
+    """Check for signs of a dup indicator, and increment the counter if present"""
     is_dup = debounce_regex.search(text)
 
     if is_dup:
         old_amount = is_dup.group('count')
         new_amount = str(int(old_amount) + 1)
-    else:
-        return f'{text} (x2)'
-
-    return text.replace(old_amount, new_amount)
-
+        start, end = is_dup.span('count')
+        return f'{text[:start]}{new_amount}{text[end:]}'
+    return f'{text} (x2)'

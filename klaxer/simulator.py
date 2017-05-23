@@ -18,7 +18,7 @@ SERVICE_NAME = 'Service'
 MESSAGE_TEMPLATE = {
     'channel': '#apitests',
     'username': 'sensu',
-    'icon_emoji': 'skull',
+    'icon_emoji': ':skull:',
     'attachments': [{
     }]
 }

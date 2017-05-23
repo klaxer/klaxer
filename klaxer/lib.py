@@ -50,4 +50,4 @@ def route(alert, routes):
 
 def send(alert):
     slack = Slack(alert.target)
-    slack.post_message(alert.message)
+    slack.send_alert(alert)

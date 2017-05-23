@@ -9,8 +9,8 @@ from setuptools import setup, find_packages
 REQUIREMENTS = [
     'hug',
     'requests',
+    'slacker',
     'zappa',
-    'slacker'
 ]
 
 if sys.version_info <= (3, 6):

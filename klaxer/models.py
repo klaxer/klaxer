@@ -15,13 +15,17 @@ def transformer(name):
 class Alert:
     """An alert. Duh."""
 
-    def __init__(self, service, message, timestamp):
+    def __init__(self, service, *, title, message, timestamp, target, username, icon_emoji, icon_url):
         self.count = 0
         self.service = service
         self.message = message
         self.timestamp = timestamp
         self.severity = None
-        self.target = None
+        self.target = target
+        self.title = title
+        self.username = username
+        self.icon_emoji = icon_emoji
+        self.icon_url = icon_url
 
     def __getitem__(self, item):
         return getattr(self, item)
@@ -31,19 +35,27 @@ class Alert:
 
     def __hash__(self):
         # Ignore timestamp since this is used to snooze
-        return hash((self.severity, self.service, self.message))
+        return hash((self.severity, self.service, self.title, self.message))
 
     @classmethod
     def from_service(cls, service_name, data):
         """Get an instance of the class with normalized service data"""
-        return cls(service_name, *TRANSFORMERS[service_name](data))
+        return cls(service_name, **TRANSFORMERS[service_name](data))
 
 
 @transformer('sensu')
 def transform_sensu(data):
     """Decompose a sensu alert into arguments for an alert"""
     # TODO: maybe calulate a hashed alert ID here?
-    return data['attachments'][0]['text'], datetime.datetime.now()
+    return {
+        'title': data['attachments'][0]['title'],
+        'message': data['attachments'][0]['text'],
+        'username': data['username'],
+        'icon_emoji': data.get('icon_emoji'),
+        'icon_url': data.get('icon_url'),
+        'target': data['channel'].lstrip('#'),
+        'timestamp': datetime.datetime.now(),
+    }
 
 class NoValueEnum(Enum):
     def __repr__(self):
@@ -52,4 +64,5 @@ class NoValueEnum(Enum):
 class Severity(NoValueEnum):
     WARNING = 'warning'
     CRITICAL = 'critical'
+    OK = 'ok'
     UNKNOWN = 'unknown'
