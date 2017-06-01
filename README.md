@@ -6,10 +6,7 @@
 
 Python 3.6 only. Try to minimize deps on external daemons/processes.
 
-Install dependencies with:
-`pip install -e .[dev]`
-
-## Docker Environment
+## Docker Environment/Development
 
 Build the docker image:
 `docker build -t klaxer .`
@@ -21,7 +18,11 @@ This will start the hug server.
 To get a shell in the container:
 `docker exec -it klaxer_instance bash`
 
-## Development
+## Local Development
+
+Install Klaxer and its development dependencies with:
+`pip install -e .[dev]`
+
 Run the klaxer server:
 `hug -f klaxer/api.py`
 
