@@ -73,3 +73,60 @@ After registering for a key, you can use this key to make requests. To see infor
     ]
 }
 ```
+
+## Defining Services
+
+Klaxer service definition is handled via a YAML configuration file. Defining a
+service determines how messages are classified, enriched, and routed by Klaxer.
+Your custom configuration file should reside at `config/klaxer.yml`, and a
+sample configuration file can be found at `config/klaxer.sample.yml`.
+
+Specific rules can be defined for alert messages and titles independently. There
+are four major rule categories:
+
+ - `classification`: The criteria that determines whether an alert is
+   classified as `CRITICAL`, `WARNING`, `OK`, or `UNKNOWN`. Defaults to
+   `UNKNOWN`
+ - `exclude`: The criteria that determines whether or not an alert is ignored
+ - `enrichments`: Defines how messages and/or titles are enriched based on their
+   content
+ - `routes`: Defines how alerts are routed based on the message/title content
+
+Services can be defined as follows:
+
+```yml
+# Define the name of your service at the top level
+sensu:
+    # An optional description can be provided
+    description: "Sensu alerts"
+    # Define rules for service messages
+    message:
+        # Defines messages containing the terms "error" or "failure" to be
+        # classified as CRITICAL, and messages containing "warning" as WARNING
+        classification:
+            CRITICAL: ["error", "failure"]
+            WARNING: ["warning"]
+        # Exclude any alert where the message contains the term "keepalive"
+        exclude: ["keepalive"]
+        # In IF/THEN fashion, enrich a message with an @ mention IF it contains
+        # the term "CheckDisk". Brackets are used to insert the original message
+        enrichments:
+            - IF: "CheckDisk"
+              THEN: "@admin - please assist: {}"
+        # In IF/THEN fashion, route any messages containing the term "build" to
+        # the "devops" channel
+        routes:
+            - IF: "build"
+              THEN: "devops"
+    # Define rules for message titles (same concept as handling messages)
+    title:
+        classification:
+            ...
+        exclude:
+            ...
+        enrichments:
+            ...
+        routes:
+            ...
+```
+
