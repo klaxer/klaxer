@@ -10,13 +10,15 @@ import sys
 
 import requests
 
+from klaxer import config
+
 SEVERITIES = ['warning', 'error']
 
 SYSTEM = 'service.example.com'
 SERVICE_NAME = 'Service'
 
 MESSAGE_TEMPLATE = {
-    'channel': '#apitests',
+    'channel': config.SLACK_SIMULATOR_CHANNEL,
     'username': 'sensu',
     'icon_emoji': ':skull:',
     'attachments': [{

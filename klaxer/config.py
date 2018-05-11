@@ -22,6 +22,7 @@ ROUTES = [
 ]
 
 SLACK_TOKEN = os.environ.get('KLAXER_TOKEN')
+SLACK_SIMULATOR_CHANNEL='#klaxer-test'
 
 # Every 5 minutes
 WINDOW = 60 * 5
