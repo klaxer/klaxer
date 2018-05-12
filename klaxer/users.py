@@ -6,14 +6,27 @@ from uuid import uuid4
 from datetime import datetime
 
 import hug
-from sqlalchemy import create_engine, ForeignKey, Column, Integer, String, Boolean, Date, Text
+from sqlalchemy import create_engine, ForeignKey, Column, Integer, String, \
+    Boolean, Date, Text
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.ext.declarative import declarative_base
 
 from klaxer import config
 
+if config.DB_CONNECTION == 'sqlite':
+    DB_CONNECTION_STRING = 'sqlite:///klaxer.db'
+elif config.DB_CONNECTION == 'postgresql':
+    pg_user = config.PG_USER
+    pg_pass = config.PG_PASS
+    pg_host = config.PG_HOST
 
-engine = create_engine(config.DB_CONNECTION_STRING)
+    DB_CONNECTION_STRING = 'postgresql://' + pg_user + ":" + pg_pass + "@" + \
+                           pg_host + "/klaxer.db"
+else:
+    print("Please, provide the correct Data Base")
+
+
+engine = create_engine(DB_CONNECTION_STRING)
 Base = declarative_base()
 Session = sessionmaker(bind=engine)
 session = Session()
